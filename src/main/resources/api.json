@@ -1,0 +1,219 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Budget Tracker Service",
+    "version": "1.0.0",
+    "description": "This microservice is in charge of storing and retrieving a user's transactions and budget history. The following api documentation shows how to perform the previously mentioned actions with Budget Tracker Service."
+  },
+  "paths": {
+    "/notifications": {
+      "post": {
+        "description": "This endpoint is used to create a notification. It returns a 201 CREATED response entity containing the created notification if the request was successful or an error status code if the request failed.",
+        "operationId": "createNotification",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/notification"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The response given upon the successful creation of the notification, containing the created resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/notification"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "description": "This endpoint is used to verify the health of the service. It returns a 204 NO CONTENT if the request was successful or an error status code if the request failed.",
+        "operationId": "healthCheck",
+        "responses": {
+          "204": {
+            "description": "The response given upon the successful execution of the request."
+          },
+          "500": {
+            "description": "An unexpected error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                },
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Invalid Request Example",
+                    "value": {
+                      "timestamp": "2023-01-01T12:00:00",
+                      "error": "500 INTERNAL SERVER ERROR",
+                      "message": "An unexpected error occurred",
+                      "path": "/health"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The service is temporarily unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                },
+                "examples": {
+                  "invalidRequest": {
+                    "summary": "Invalid Request Example",
+                    "value": {
+                      "timestamp": "2023-01-01T12:00:00",
+                      "error": "503 SERVICE UNAVAILABLE",
+                      "message": "The service is temporarily unavailable",
+                      "path": "/health"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Status": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "COMPLETED",
+          "ERROR"
+        ]
+      },
+      "Channel": {
+        "type": "string",
+        "enum": [
+          "MAIL",
+          "PC",
+          "MOBILE"
+        ]
+      },
+      "notification": {
+        "type": "object",
+        "description": "This object is used to represent a notification request.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "example": "1",
+            "description": "The ID of the notification."
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the notification.",
+            "example": "Reminder",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "body": {
+            "type": "string",
+            "example": "A simple reminder to drink water every 5 minutes!",
+            "description": "The body of the notification",
+            "minLength": 1,
+            "maxLength": 250
+          },
+          "channels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Channel"
+            },
+            "minItems": 1
+          },
+          "datetime": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-03-12T12:10:05Z",
+            "description": "The date and time at which the notification should be sent."
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          }
+        },
+        "required": [
+          "title",
+          "body",
+          "channels",
+          "datetime"
+        ]
+      },
+      "error": {
+        "type": "object",
+        "description": "This object is used to display error details, including the timestamp of when the error occurred, the HTTP status code of the error, the error message, and the endpoint path where the error occurred.",
+        "properties": {
+          "timestamp": {
+            "nullable": false,
+            "type": "string",
+            "format": "date-time",
+            "example": "2011-06-26T19:30:00Z",
+            "description": "The exact timestamp of when the error occurred."
+          },
+          "error": {
+            "nullable": false,
+            "type": "string",
+            "example": "400 BAD REQUEST",
+            "description": "The HTTP status code of the error."
+          },
+          "message": {
+            "nullable": false,
+            "type": "string",
+            "example": "Error during request",
+            "description": "The error message."
+          },
+          "path": {
+            "nullable": false,
+            "type": "string",
+            "example": "/login",
+            "description": "The endpoint path where the error occurred."
+          }
+        }
+      }
+    }
+  }
+}
